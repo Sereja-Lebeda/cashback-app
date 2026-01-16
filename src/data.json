@@ -1,0 +1,42 @@
+{
+  "banks": [
+    {
+      "id": "1",
+      "bankName" : "Alpha Bank",
+      "logo": "/pics/alphaBankIcon.svg",
+      "categories" : [
+        {
+          "name": "Fuel",
+          "procent": "7%"
+        },
+        {
+          "name": "Grocery",
+          "procent": "5%"
+        },
+        {
+          "name": "Shoping",
+          "procent": "4%"
+        }
+    ]
+    },
+    {
+      "id": "2",
+      "bankName" : "Sber Bank",
+      "logo": "/pics/sberBankIcon.jpeg",
+      "categories" : [
+        {
+          "name": "Books",
+          "procent": "11%"
+        },
+        {
+          "name": "All purchaces",
+          "procent": "1%"
+        },
+        {
+          "name": "Sport",
+          "procent": "8%"
+        }
+      ]
+      }
+  ]
+}
