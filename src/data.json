@@ -2,39 +2,43 @@
   "banks": [
     {
       "id": "1",
-      "bankName" : "Alpha Bank",
+      "bankName" : "Альфа Банк",
       "logo": "/pics/alphaBankIcon.svg",
       "categories" : [
         {
-          "name": "Fuel",
+          "name": "Топливо",
           "procent": "7%"
         },
         {
-          "name": "Grocery",
+          "name": "Продукты",
           "procent": "5%"
         },
         {
-          "name": "Shoping",
+          "name": "Одежда",
           "procent": "4%"
         }
     ]
     },
     {
       "id": "2",
-      "bankName" : "Sber Bank",
+      "bankName" : "Сбер Банк",
       "logo": "/pics/sberBankIcon.jpeg",
       "categories" : [
         {
-          "name": "Books",
+          "name": "Книги",
           "procent": "11%"
         },
         {
-          "name": "All purchaces",
+          "name": "Все покупки",
           "procent": "1%"
         },
         {
-          "name": "Sport",
+          "name": "Спорт",
           "procent": "8%"
+        },
+        {
+          "name": "Ремонт",
+          "procent": "3%"
         }
       ]
       }

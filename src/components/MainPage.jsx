@@ -10,7 +10,7 @@ export default function MainPage() {
     <div className="flex flex-col justify-between items-center h-full">
       <Header />
 
-      <div className="flex flex-col justify-self-start items-center w-full h-full gap-4 m-16">
+      <div className="flex justify-center items-start w-full h-full gap-4 m-10">
         {}
         {banks.map((bank) => (
           <Card
@@ -22,7 +22,7 @@ export default function MainPage() {
         ))}
       </div>
 
-      <div className="flex flex-row justify-center items-end">
+      <div className="flex flex-row justify-center items-start">
         <Footer />
       </div>
     </div>
