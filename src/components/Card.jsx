@@ -1,23 +1,36 @@
 import DotsIcon from "../icons/DotsIcon";
 import DropMenu from "./DropMenu";
-// import { useState } from "react";
+import { getBankIconComponent } from "../utils/bankIcons";
 
-export default function Card({ bankIcon, bankName, categories }) {
-  // const [toggleMenu, setToggleMenu] = useState(false);
-  // const handleMenuCick = () => {
-  //   setToggleMenu(!toggleMenu);
-  // };
+export default function Card({ bankIcon, bankIconType, bankName, categories }) {
+  // Определяем, что рендерить: компонент или изображение
+  const renderIcon = () => {
+    if (bankIconType === "component") {
+      // Если это компонент, получаем его из маппинга
+      const IconComponent = getBankIconComponent(bankIcon);
+      if (IconComponent) {
+        return <IconComponent className="w-9 h-9" />;
+      }
+      // Если компонент не найден, возвращаем fallback
+      return <div className="w-9 h-9 bg-gray-300 rounded-xl" />;
+    } else {
+      // Если это изображение, используем обычный <img>
+      return (
+        <img
+          src={bankIcon}
+          alt={`${bankName} logo`}
+          className="w-9 h-9 object-contain rounded-xl"
+        />
+      );
+    }
+  };
 
   return (
     // Принцип: разделить карточку на 3 колонки
     <div className="relative flex flex-col items-center gap-2 w-24 min-h-96 bg-card-bg border-3 border-card-border rounded-lg py-2 px-1">
       {/* Строка 1: Банк - auto (занимает столько, сколько нужно) */}
       <div className="flex flex-col justify-center items-center w-[60px] gap-2">
-        <img
-          src={bankIcon}
-          alt={`${bankIcon} logo`}
-          className="w-9 h-9 object-contain"
-        />
+        {renderIcon()}
         <span className="flex text-center text-sm font-bold">{bankName}</span>
       </div>
 

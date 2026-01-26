@@ -2,9 +2,10 @@
   "banks": [
     {
       "id": "1",
-      "bankName" : "Альфа Банк",
-      "logo": "/pics/alphaBankIcon.svg",
-      "categories" : [
+      "bankName": "Альфа Банк",
+      "logoType": "component",
+      "logo": "alphaBank",
+      "categories": [
         {
           "name": "Топливо",
           "procent": "7%"
@@ -17,13 +18,14 @@
           "name": "Одежда",
           "procent": "4%"
         }
-    ]
+      ]
     },
     {
       "id": "2",
-      "bankName" : "Сбер Банк",
+      "bankName": "Сбер Банк",
+      "logoType": "image",
       "logo": "/pics/sberBankIcon.jpeg",
-      "categories" : [
+      "categories": [
         {
           "name": "Книги",
           "procent": "11%"
@@ -41,6 +43,6 @@
           "procent": "3%"
         }
       ]
-      }
+    }
   ]
 }

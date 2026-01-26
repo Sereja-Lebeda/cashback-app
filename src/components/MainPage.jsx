@@ -11,12 +11,12 @@ export default function MainPage() {
       <Header />
 
       <div className="flex justify-center items-start w-full h-full gap-4 m-10">
-        {}
         {banks.map((bank) => (
           <Card
             key={bank.id}
             bankName={bank.bankName}
             bankIcon={bank.logo}
+            bankIconType={bank.logoType}
             categories={bank.categories}
           />
         ))}
