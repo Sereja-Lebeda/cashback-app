@@ -3,9 +3,10 @@ import {
   PencilIcon,
   Square2StackIcon,
   TrashIcon,
+  Bars3Icon,
 } from "@heroicons/react/16/solid";
 
-export default function DropMenu({ children, className }) {
+export default function DropMenu({ children, className, onMoveClick }) {
   return (
     <Menu>
       <MenuButton className={className}>{children}</MenuButton>
@@ -25,6 +26,15 @@ export default function DropMenu({ children, className }) {
           <button className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 data-focus:bg-white/10">
             <Square2StackIcon className="size-4 fill-white/30" />
             Duplicate
+          </button>
+        </MenuItem>
+        <MenuItem>
+          <button
+            className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 data-focus:bg-white/10"
+            onClick={onMoveClick}
+          >
+            <Bars3Icon className="size-4 fill-white/30" />
+            Replace
           </button>
         </MenuItem>
         <div className="my-1 h-px bg-white/5" />

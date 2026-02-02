@@ -1,46 +1,54 @@
 {
-  "banks": [
+  "userOrganizations": [
     {
-      "id": "1",
-      "bankName": "Альфа Банк",
-      "logoType": "component",
-      "logo": "alphaBank",
+      "organizationId": "alphaBank",
+      "organizationName": "Альфа-Банк",
       "categories": [
         {
-          "name": "Топливо",
-          "procent": "7%"
+          "categoryId": "fuel",
+          "categoryName": "Топливо",
+          "categoryProcent": "10%"
         },
         {
-          "name": "Продукты",
-          "procent": "5%"
+          "categoryId": "groceries",
+          "categoryName": "Продукты",
+          "categoryProcent": "13%"
         },
         {
-          "name": "Одежда",
-          "procent": "4%"
+          "categoryId": "clothing",
+          "categoryName": "Одежда",
+          "categoryProcent": "9%"
+        },
+        {
+          "categoryId": "books",
+          "categoryName": "Книги",
+          "categoryProcent": "5%"
+        },
+        {
+          "categoryId": "electronics",
+          "categoryName": "Электроника",
+          "categoryProcent": "7%"
         }
       ]
     },
     {
-      "id": "2",
-      "bankName": "Сбер Банк",
-      "logoType": "image",
-      "logo": "/pics/sberBankIcon.jpeg",
+      "organizationId": "sberBank",
+      "organizationName": "Сбербанк",
       "categories": [
         {
-          "name": "Книги",
-          "procent": "11%"
+          "categoryId": "transport",
+          "categoryName": "Транспорт",
+          "categoryProcent": "10%"
         },
         {
-          "name": "Все покупки",
-          "procent": "1%"
+          "categoryId": "entertainment",
+          "categoryName": "Развлечения",
+          "categoryProcent": "13%"
         },
         {
-          "name": "Спорт",
-          "procent": "8%"
-        },
-        {
-          "name": "Ремонт",
-          "procent": "3%"
+          "categoryId": "health",
+          "categoryName": "Здоровье",
+          "categoryProcent": "9%"
         }
       ]
     }
