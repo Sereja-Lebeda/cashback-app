@@ -85,8 +85,8 @@ export default function MainPage() {
               >
                 {userOrganizations.map((organization, index) => (
                   <Draggable
-                    key={organization.organizationId}
-                    draggableId={organization.organizationId}
+                    key={organization.id}
+                    draggableId={String(organization.id)}
                     index={index}
                     isDragDisabled={!isMoveMode}
                   >

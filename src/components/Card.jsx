@@ -29,7 +29,7 @@ export default function Card({
 
       {/* Строка 2: Категории */}
       <div className="pt-2">
-        <div className="grid grid-rows-auto gap-2 w-auto ">
+        <div className="grid grid-rows-auto gap-2 w-auto select-none">
           {/* <div className="flex flex-col justify-end items-center gap-2 w-auto "> */}
           {categories.map((category, id) => (
             <div key={id} className="flex flex-col items-center justify-center">

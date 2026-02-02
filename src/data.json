@@ -1,6 +1,7 @@
 {
   "userOrganizations": [
     {
+      "id": 1,
       "organizationId": "alphaBank",
       "organizationName": "Альфа-Банк",
       "categories": [
@@ -32,6 +33,7 @@
       ]
     },
     {
+      "id": 2,
       "organizationId": "sberBank",
       "organizationName": "Сбербанк",
       "categories": [
@@ -49,6 +51,38 @@
           "categoryId": "health",
           "categoryName": "Здоровье",
           "categoryProcent": "9%"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "organizationId": "alphaBank",
+      "organizationName": "Альфа-Банк",
+      "categories": [
+        {
+          "categoryId": "fuel",
+          "categoryName": "Топливо",
+          "categoryProcent": "10%"
+        },
+        {
+          "categoryId": "groceries",
+          "categoryName": "Продукты",
+          "categoryProcent": "13%"
+        },
+        {
+          "categoryId": "clothing",
+          "categoryName": "Одежда",
+          "categoryProcent": "9%"
+        },
+        {
+          "categoryId": "books",
+          "categoryName": "Книги",
+          "categoryProcent": "5%"
+        },
+        {
+          "categoryId": "electronics",
+          "categoryName": "Электроника",
+          "categoryProcent": "7%"
         }
       ]
     }
