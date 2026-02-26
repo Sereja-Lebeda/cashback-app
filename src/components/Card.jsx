@@ -28,8 +28,8 @@ export default function Card({
       </div>
 
       {/* Строка 2: Категории */}
-      <div className="pt-2">
-        <div className="grid grid-rows-auto gap-2 w-auto select-none">
+      <div className="relative pt-2">
+        <div className="grid grid-rows-auto gap-2 w-full select-none max-h-[310px] overflow-y-auto no-scrollbar pb-4">
           {/* <div className="flex flex-col justify-end items-center gap-2 w-auto "> */}
           {categories.map((category, id) => (
             <div key={id} className="flex flex-col items-center justify-center">
@@ -47,14 +47,17 @@ export default function Card({
           ))}
         </div>
 
-        {/* Абсолют кнопка */}
-        <DropMenu
-          className="absolute left-20 top-1"
-          onMoveClick={onEnterMoveMode}
-        >
-          <DotsIcon className="w-5 h-5" />
-        </DropMenu>
+        {/* Градиент внизу, подсказывающий, что список прокручиваемый */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-linear-to-t from-card-bg to-transparent" />
       </div>
+
+      {/* Абсолют кнопка (позиционируется относительно всей карточки) */}
+      <DropMenu
+        className="absolute left-20 top-1"
+        onMoveClick={onEnterMoveMode}
+      >
+        <DotsIcon className="w-5 h-5" />
+      </DropMenu>
     </div>
   );
 }

@@ -83,6 +83,16 @@
           "categoryId": "electronics",
           "categoryName": "Электроника",
           "categoryProcent": "7%"
+        },
+        {
+          "categoryId": "furniture",
+          "categoryName": "Мебель",
+          "categoryProcent": "10%"
+        },
+        {
+          "categoryId": "other",
+          "categoryName": "Другое",
+          "categoryProcent": "10%"
         }
       ]
     },

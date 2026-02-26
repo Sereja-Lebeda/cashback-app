@@ -105,7 +105,7 @@ export default function MainPage() {
 
       <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
         {/* Внешний контейнер: окно с горизонтальным скроллом */}
-        <div className="w-full overflow-x-auto">
+        <div className="w-full overflow-x-auto no-scrollbar">
           <Droppable droppableId="cards" direction="horizontal">
             {(provided) => (
               // Внутренний контейнер: горизонтальная лента карточек
