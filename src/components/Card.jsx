@@ -11,7 +11,7 @@ export default function Card({
   return (
     <div
       data-card
-      className={`relative flex flex-col items-center gap-2 w-26 h-auto bg-card-bg border-3 border-card-border rounded-lg py-2 px-1 ${
+      className={`relative flex flex-col items-center gap-2 shrink-0 min-w-[calc(100vw/3-1.5rem)] max-w-[calc(100vw/3-1.5rem)] bg-card-bg border-3 border-card-border rounded-lg py-2 px-1 ${
         isMoveMode ? "animate-shake" : ""
       }`}
     >

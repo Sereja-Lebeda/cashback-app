@@ -9,7 +9,7 @@ import organizations from "../organizations";
 
 export default function MainPage() {
   const [userOrganizations, setUserOrganizations] = useState(() => {
-    return data.userOrganizations.map((userOrg) => {
+    const base = data.userOrganizations.map((userOrg) => {
       const org = organizations.find(
         (org) => org.id === userOrg.organizationId
       );
@@ -18,10 +18,33 @@ export default function MainPage() {
         logo: org?.logo,
       };
     });
+
+    if (typeof window === "undefined") {
+      return base;
+    }
+
+    try {
+      const saved = window.localStorage.getItem("cardsOrder");
+      if (!saved) return base;
+
+      const order = JSON.parse(saved);
+      if (!Array.isArray(order)) return base;
+
+      const byId = new Map(base.map((item) => [item.id, item]));
+
+      const ordered = order
+        .map((id) => byId.get(id))
+        .filter(Boolean);
+
+      const remaining = base.filter((item) => !order.includes(item.id));
+
+      return [...ordered, ...remaining];
+    } catch {
+      return base;
+    }
   });
 
   const [isMoveMode, setIsMoveMode] = useState(false);
-  const cardsRef = useRef(null);
   const justDraggedRef = useRef(false);
 
   function handleDragStart() {
@@ -41,6 +64,12 @@ export default function MainPage() {
       const items = [...prev];
       const [removed] = items.splice(result.source.index, 1);
       items.splice(result.destination.index, 0, removed);
+
+      if (typeof window !== "undefined") {
+        const order = items.map((item) => item.id);
+        window.localStorage.setItem("cardsOrder", JSON.stringify(order));
+      }
+
       return items;
     });
   }
@@ -75,13 +104,15 @@ export default function MainPage() {
       <Header />
 
       <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-        <div className="flex justify-center w-full h-full">
+        {/* Внешний контейнер: окно с горизонтальным скроллом */}
+        <div className="w-full overflow-x-auto">
           <Droppable droppableId="cards" direction="horizontal">
             {(provided) => (
+              // Внутренний контейнер: горизонтальная лента карточек
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className="flex justify-center items-start w-full h-full gap-4 m-10"
+                className="flex flex-nowrap items-start gap-4 px-4 py-4"
               >
                 {userOrganizations.map((organization, index) => (
                   <Draggable

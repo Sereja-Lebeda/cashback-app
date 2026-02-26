@@ -85,6 +85,28 @@
           "categoryProcent": "7%"
         }
       ]
+    },
+    {
+      "id": 4,
+      "organizationId": "sberBank",
+      "organizationName": "Сбербанк",
+      "categories": [
+        {
+          "categoryId": "transport",
+          "categoryName": "Транспорт",
+          "categoryProcent": "10%"
+        },
+        {
+          "categoryId": "entertainment",
+          "categoryName": "Развлечения",
+          "categoryProcent": "13%"
+        },
+        {
+          "categoryId": "health",
+          "categoryName": "Здоровье",
+          "categoryProcent": "9%"
+        }
+      ]
     }
   ]
 }
