@@ -8,6 +8,15 @@ export default function Card({
   isMoveMode,
   onEnterMoveMode,
 }) {
+  const MAX_VISIBLE_CATEGORIES = 5;
+  const hasOverflow = categories.length > MAX_VISIBLE_CATEGORIES;
+  const visibleCategories = hasOverflow
+    ? categories
+    : categories.slice(0, MAX_VISIBLE_CATEGORIES);
+  const placeholdersCount = hasOverflow
+    ? 0
+    : Math.max(0, MAX_VISIBLE_CATEGORIES - visibleCategories.length);
+
   return (
     <div
       data-card
@@ -29,10 +38,16 @@ export default function Card({
 
       {/* Строка 2: Категории */}
       <div className="relative pt-2">
-        <div className="grid grid-rows-auto gap-2 w-full select-none max-h-[310px] overflow-y-auto no-scrollbar pb-4">
-          {/* <div className="flex flex-col justify-end items-center gap-2 w-auto "> */}
-          {categories.map((category, id) => (
-            <div key={id} className="flex flex-col items-center justify-center">
+        <div
+          className={`grid grid-rows-auto gap-2 w-full select-none ${
+            hasOverflow ? "max-h-[310px] overflow-y-auto no-scrollbar pb-4" : ""
+          }`}
+        >
+          {visibleCategories.map((category, index) => (
+            <div
+              key={category.categoryId ?? index}
+              className="flex flex-col items-center justify-center"
+            >
               {/* Фиксированная высота для названия - всегда 2 строки */}
               <div className="h-8 flex items-center justify-center px-2">
                 <span className="text-center wrap-break-words text-sm line-clamp-2">
@@ -45,10 +60,24 @@ export default function Card({
               </span>
             </div>
           ))}
+          {!hasOverflow &&
+            Array.from({ length: placeholdersCount }).map((_, index) => (
+              <div
+                key={`placeholder-${index}`}
+                className="flex flex-col items-center justify-center opacity-0 pointer-events-none"
+              >
+                <div className="h-8 flex items-center justify-center px-2">
+                  <span className="text-sm">-</span>
+                </div>
+                <span className="text-base">-</span>
+              </div>
+            ))}
         </div>
 
         {/* Градиент внизу, подсказывающий, что список прокручиваемый */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-linear-to-t from-card-bg to-transparent" />
+        {hasOverflow && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-linear-to-t from-card-bg to-transparent" />
+        )}
       </div>
 
       {/* Абсолют кнопка (позиционируется относительно всей карточки) */}
