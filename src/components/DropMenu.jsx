@@ -11,6 +11,8 @@ export default function DropMenu({
   className,
   onMoveClick,
   onEditClick,
+  onDuplicateClick,
+  onDeleteClick,
 }) {
   return (
     <Menu>
@@ -38,6 +40,7 @@ export default function DropMenu({
         <MenuItem>
           <button
             type="button"
+            onClick={onDuplicateClick}
             className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 bg-text-secondary focus:outline-none focus:ring-0 focus-visible:ring-0"
           >
             <Square2StackIcon className="size-4 fill-white/30" />
@@ -59,6 +62,7 @@ export default function DropMenu({
         <MenuItem>
           <button
             type="button"
+            onClick={onDeleteClick}
             className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 bg-text-secondary focus:outline-none focus:ring-0 focus-visible:ring-0"
           >
             <TrashIcon className="size-4 fill-white/30" />

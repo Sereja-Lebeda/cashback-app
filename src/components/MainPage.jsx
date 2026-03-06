@@ -6,6 +6,7 @@ import Footer from "./Footer";
 import Card from "./Card";
 import AddCategoryModal from "./AddCategoryModal";
 import ChangeBankModal from "./ChangeBankModal";
+import ConfirmDeleteCardModal from "./ConfirmDeleteCardModal";
 import data from "../data.json";
 import organizations from "../organizations";
 
@@ -111,6 +112,12 @@ export default function MainPage() {
     open: false,
     cardId: null,
   });
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState({
+    open: false,
+    cardId: null,
+  });
+  const [deletingCardId, setDeletingCardId] = useState(null);
+  const [lastAddedCardId, setLastAddedCardId] = useState(null);
   const justDraggedRef = useRef(false);
 
   function handleEditClick(cardId) {
@@ -252,6 +259,68 @@ export default function MainPage() {
     setIsMoveMode(true);
   }
 
+  function requestDeleteCard(cardId) {
+    setDeleteConfirmModal({ open: true, cardId });
+  }
+
+  function performDeleteCard(cardId) {
+    setUserOrganizations((prev) => {
+      const items = prev.filter((o) => o.id !== cardId);
+      saveUserOrganizations(items);
+      return items;
+    });
+    setDeletingCardId(null);
+    if (editingCardId === cardId) setEditingCardId(null);
+    if (categoryModal.cardId === cardId && categoryModal.open) {
+      setCategoryModal({
+        open: false,
+        mode: "add",
+        cardId: null,
+        categoryId: null,
+      });
+    }
+    if (bankModal.cardId === cardId && bankModal.open) {
+      setBankModal({ open: false, cardId: null });
+    }
+  }
+
+  function handleDeleteConfirm() {
+    const cardId = deleteConfirmModal.cardId;
+    if (cardId == null) return;
+    setDeleteConfirmModal({ open: false, cardId: null });
+    setDeletingCardId(cardId);
+  }
+
+  function handleDeleteAnimationEnd(cardId) {
+    if (deletingCardId === cardId) {
+      performDeleteCard(cardId);
+    }
+  }
+
+  function handleDuplicateCard(cardId) {
+    setUserOrganizations((prev) => {
+      const idx = prev.findIndex((o) => o.id === cardId);
+      if (idx === -1) return prev;
+      const source = prev[idx];
+      const maxId = Math.max(...prev.map((o) => o.id), 0);
+      const newId = maxId + 1;
+      const newCard = {
+        ...source,
+        id: newId,
+        categories: source.categories.map((c) => ({ ...c })),
+      };
+      const items = [...prev];
+      items.splice(idx + 1, 0, newCard);
+      saveUserOrganizations(items);
+      setLastAddedCardId(newId);
+      return items;
+    });
+  }
+
+  function handleCardAppearAnimationEnd() {
+    setLastAddedCardId(null);
+  }
+
   useEffect(() => {
     if (!isMoveMode && editingCardId === null) return;
 
@@ -262,8 +331,17 @@ export default function MainPage() {
       const onMenu = event.target.closest("[data-headlessui-state]");
       const onCategoryModal = event.target.closest("[data-add-category-modal]");
       const onBankModalEl = event.target.closest("[data-change-bank-modal]");
+      const onConfirmDeleteModal = event.target.closest(
+        "[data-confirm-delete-modal]",
+      );
 
-      if (!onCard && !onMenu && !onCategoryModal && !onBankModalEl) {
+      if (
+        !onCard &&
+        !onMenu &&
+        !onCategoryModal &&
+        !onBankModalEl &&
+        !onConfirmDeleteModal
+      ) {
         setIsMoveMode(false);
         setEditingCardId(null);
       }
@@ -291,39 +369,59 @@ export default function MainPage() {
                 {...provided.droppableProps}
                 className="flex flex-nowrap items-start gap-4 px-4 py-4"
               >
-                {userOrganizations.map((organization, index) => (
-                  <Draggable
-                    key={organization.id}
-                    draggableId={String(organization.id)}
-                    index={index}
-                    isDragDisabled={!isMoveMode}
-                  >
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        data-card
-                        className="focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                      >
-                        <Card
-                          logo={organization.logo}
-                          organizationName={organization.organizationName}
-                          categories={organization.categories}
-                          isMoveMode={isMoveMode}
-                          isEditMode={editingCardId !== null}
-                          onEnterMoveMode={handleEnterMoveMode}
-                          onEditClick={() => handleEditClick(organization.id)}
-                          onPlusClick={() => handlePlusClick(organization.id)}
-                          onCategoryClick={({ categoryId }) =>
-                            handleCategoryClick(organization.id, categoryId)
-                          }
-                          onBankClick={() => handleBankClick(organization.id)}
-                        />
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
+                {userOrganizations.map((organization, index) => {
+                  const isDeleting = deletingCardId === organization.id;
+                  const isNew = lastAddedCardId === organization.id;
+                  return (
+                    <Draggable
+                      key={organization.id}
+                      draggableId={String(organization.id)}
+                      index={index}
+                      isDragDisabled={!isMoveMode || isDeleting}
+                    >
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          data-card
+                          className={`focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 ${
+                            isDeleting ? "animate-card-out" : ""
+                          } ${isNew ? "animate-card-in" : ""}`}
+                          onAnimationEnd={() => {
+                            if (isDeleting) {
+                              handleDeleteAnimationEnd(organization.id);
+                            }
+                            if (isNew) {
+                              handleCardAppearAnimationEnd();
+                            }
+                          }}
+                        >
+                          <Card
+                            logo={organization.logo}
+                            organizationName={organization.organizationName}
+                            categories={organization.categories}
+                            isMoveMode={isMoveMode}
+                            isEditMode={editingCardId !== null}
+                            onEnterMoveMode={handleEnterMoveMode}
+                            onEditClick={() => handleEditClick(organization.id)}
+                            onPlusClick={() => handlePlusClick(organization.id)}
+                            onCategoryClick={({ categoryId }) =>
+                              handleCategoryClick(organization.id, categoryId)
+                            }
+                            onBankClick={() => handleBankClick(organization.id)}
+                            onDuplicateClick={() =>
+                              handleDuplicateCard(organization.id)
+                            }
+                            onDeleteClick={() =>
+                              requestDeleteCard(organization.id)
+                            }
+                          />
+                        </div>
+                      )}
+                    </Draggable>
+                  );
+                })}
                 {provided.placeholder}
               </div>
             )}
@@ -393,6 +491,14 @@ export default function MainPage() {
           userOrganizations.find((o) => o.id === bankModal.cardId)
             ?.organizationId ?? null
         }
+      />
+
+      <ConfirmDeleteCardModal
+        isOpen={deleteConfirmModal.open}
+        onClose={() =>
+          setDeleteConfirmModal({ open: false, cardId: null })
+        }
+        onConfirm={handleDeleteConfirm}
       />
     </div>
   );
