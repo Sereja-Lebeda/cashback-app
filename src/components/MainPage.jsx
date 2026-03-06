@@ -5,6 +5,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import Card from "./Card";
 import AddCategoryModal from "./AddCategoryModal";
+import ChangeBankModal from "./ChangeBankModal";
 import data from "../data.json";
 import organizations from "../organizations";
 
@@ -106,6 +107,10 @@ export default function MainPage() {
     cardId: null,
     categoryId: null,
   });
+  const [bankModal, setBankModal] = useState({
+    open: false,
+    cardId: null,
+  });
   const justDraggedRef = useRef(false);
 
   function handleEditClick(cardId) {
@@ -127,6 +132,13 @@ export default function MainPage() {
       mode: "edit",
       cardId,
       categoryId,
+    });
+  }
+
+  function handleBankClick(cardId) {
+    setBankModal({
+      open: true,
+      cardId,
     });
   }
 
@@ -190,6 +202,30 @@ export default function MainPage() {
     });
   }
 
+  function handleBankModalClose() {
+    setBankModal({
+      open: false,
+      cardId: null,
+    });
+  }
+
+  function handleChangeBank(cardId, organizationId) {
+    setUserOrganizations((prev) => {
+      const items = prev.map((item) => {
+        if (item.id !== cardId) return item;
+        const org = organizations.find((o) => o.id === organizationId);
+        return {
+          ...item,
+          organizationId: org?.id ?? item.organizationId,
+          organizationName: org?.name ?? item.organizationName,
+          logo: org?.logo,
+        };
+      });
+      saveUserOrganizations(items);
+      return items;
+    });
+  }
+
   function handleDragStart() {
     justDraggedRef.current = true;
   }
@@ -224,9 +260,10 @@ export default function MainPage() {
 
       const onCard = event.target.closest("[data-card]");
       const onMenu = event.target.closest("[data-headlessui-state]");
-      const onModal = event.target.closest("[data-add-category-modal]");
+      const onCategoryModal = event.target.closest("[data-add-category-modal]");
+      const onBankModalEl = event.target.closest("[data-change-bank-modal]");
 
-      if (!onCard && !onMenu && !onModal) {
+      if (!onCard && !onMenu && !onCategoryModal && !onBankModalEl) {
         setIsMoveMode(false);
         setEditingCardId(null);
       }
@@ -281,6 +318,7 @@ export default function MainPage() {
                           onCategoryClick={({ categoryId }) =>
                             handleCategoryClick(organization.id, categoryId)
                           }
+                          onBankClick={() => handleBankClick(organization.id)}
                         />
                       </div>
                     )}
@@ -341,6 +379,19 @@ export default function MainPage() {
                 ?.categories?.find((c) => c.categoryId === categoryModal.categoryId)
                 ?.categoryPercent ?? null
             : null
+        }
+      />
+
+      <ChangeBankModal
+        isOpen={bankModal.open}
+        onClose={handleBankModalClose}
+        onSubmit={(organizationId) => {
+          if (!bankModal.cardId) return;
+          handleChangeBank(bankModal.cardId, organizationId);
+        }}
+        currentOrganizationId={
+          userOrganizations.find((o) => o.id === bankModal.cardId)
+            ?.organizationId ?? null
         }
       />
     </div>

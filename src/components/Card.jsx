@@ -12,6 +12,7 @@ export default function Card({
   onEditClick,
   onPlusClick,
   onCategoryClick,
+  onBankClick,
 }) {
   const MAX_VISIBLE_CATEGORIES = 5;
   const hasOverflow = categories.length > MAX_VISIBLE_CATEGORIES;
@@ -32,16 +33,34 @@ export default function Card({
       }`}
     >
       {/* Строка 1: Банк - auto (занимает столько, сколько нужно) */}
-      <div className="flex flex-col justify-center items-center w-[60px] gap-2 min-h-12">
-        {logo &&
-          (() => {
-            const IconComponent = logo;
-            return <IconComponent className="w-9 h-9" />;
-          })()}
-        <span className="flex text-center text-sm font-bold">
-          {organizationName}
-        </span>
-      </div>
+      {isEditMode ? (
+        <button
+          type="button"
+          onClick={onBankClick}
+          className="w-full mx-auto flex flex-col justify-center items-center gap-2 min-h-12 rounded-lg border-2 border-dashed border-card-border hover:bg-card-hover/25 transition-colors"
+          aria-label="Изменить банк"
+        >
+          {logo &&
+            (() => {
+              const IconComponent = logo;
+              return <IconComponent className="w-9 h-9" />;
+            })()}
+          <span className="flex text-center text-sm font-bold">
+            {organizationName}
+          </span>
+        </button>
+      ) : (
+        <div className="flex flex-col justify-center items-center w-[60px] gap-2 min-h-12">
+          {logo &&
+            (() => {
+              const IconComponent = logo;
+              return <IconComponent className="w-9 h-9" />;
+            })()}
+          <span className="flex text-center text-sm font-bold">
+            {organizationName}
+          </span>
+        </div>
+      )}
 
       {/* Строка 2: Категории (фиксированный грид — 5 строк по 52px) */}
       <div
