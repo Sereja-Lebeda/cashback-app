@@ -10,13 +10,44 @@ import organizations from "../organizations";
 
 const STORAGE_KEY = "cardsData";
 
+function parsePercentToNumber(value) {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    const withoutPercent = trimmed.endsWith("%")
+      ? trimmed.slice(0, -1).trim()
+      : trimmed;
+    const normalized = withoutPercent.replace(",", ".");
+    const n = Number(normalized);
+    return Number.isFinite(n) ? n : 0;
+  }
+  return 0;
+}
+
+function normalizeCategory(category) {
+  return {
+    categoryId: category.categoryId,
+    categoryName: category.categoryName,
+    categoryPercent: parsePercentToNumber(
+      category.categoryPercent ?? category.categoryProcent,
+    ),
+  };
+}
+
+function normalizeUserOrganization(userOrg) {
+  return {
+    ...userOrg,
+    categories: Array.isArray(userOrg.categories)
+      ? userOrg.categories.map(normalizeCategory)
+      : [],
+  };
+}
+
 function loadUserOrganizations() {
   const base = data.userOrganizations.map((userOrg) => {
-    const org = organizations.find(
-      (org) => org.id === userOrg.organizationId
-    );
+    const org = organizations.find((org) => org.id === userOrg.organizationId);
     return {
-      ...userOrg,
+      ...normalizeUserOrganization(userOrg),
       logo: org?.logo,
     };
   });
@@ -30,16 +61,17 @@ function loadUserOrganizations() {
     if (!saved) return base;
 
     const parsed = JSON.parse(saved);
-    if (!parsed?.userOrganizations || !Array.isArray(parsed.userOrganizations)) {
+    if (
+      !parsed?.userOrganizations ||
+      !Array.isArray(parsed.userOrganizations)
+    ) {
       return base;
     }
 
     return parsed.userOrganizations.map((userOrg) => {
-      const org = organizations.find(
-        (o) => o.id === userOrg.organizationId
-      );
+      const org = organizations.find((o) => o.id === userOrg.organizationId);
       return {
-        ...userOrg,
+        ...normalizeUserOrganization(userOrg),
         logo: org?.logo,
       };
     });
@@ -50,20 +82,30 @@ function loadUserOrganizations() {
 
 function saveUserOrganizations(items) {
   if (typeof window === "undefined") return;
-  const toSave = items.map(({ logo, ...rest }) => rest);
+  const toSave = items.map((item) => {
+    const { logo, ...rest } = item;
+    void logo;
+    return rest;
+  });
   window.localStorage.setItem(
     STORAGE_KEY,
-    JSON.stringify({ userOrganizations: toSave })
+    JSON.stringify({ userOrganizations: toSave }),
   );
 }
 
 export default function MainPage() {
-  const [userOrganizations, setUserOrganizations] = useState(loadUserOrganizations);
+  const [userOrganizations, setUserOrganizations] = useState(
+    loadUserOrganizations,
+  );
 
   const [isMoveMode, setIsMoveMode] = useState(false);
   const [editingCardId, setEditingCardId] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalCardId, setModalCardId] = useState(null);
+  const [categoryModal, setCategoryModal] = useState({
+    open: false,
+    mode: "add", // "add" | "edit"
+    cardId: null,
+    categoryId: null,
+  });
   const justDraggedRef = useRef(false);
 
   function handleEditClick(cardId) {
@@ -71,8 +113,21 @@ export default function MainPage() {
   }
 
   function handlePlusClick(cardId) {
-    setModalCardId(cardId);
-    setModalOpen(true);
+    setCategoryModal({
+      open: true,
+      mode: "add",
+      cardId,
+      categoryId: null,
+    });
+  }
+
+  function handleCategoryClick(cardId, categoryId) {
+    setCategoryModal({
+      open: true,
+      mode: "edit",
+      cardId,
+      categoryId,
+    });
   }
 
   function handleAddCategory(cardId, newCategory) {
@@ -83,16 +138,56 @@ export default function MainPage() {
               ...item,
               categories: [...item.categories, newCategory],
             }
-          : item
+          : item,
       );
       saveUserOrganizations(items);
       return items;
     });
   }
 
+  function handleUpdateCategory(cardId, originalCategoryId, updatedCategory) {
+    setUserOrganizations((prev) => {
+      const items = prev.map((item) => {
+        if (item.id !== cardId) return item;
+
+        const duplicateExists = item.categories.some(
+          (c) =>
+            c.categoryId === updatedCategory.categoryId &&
+            c.categoryId !== originalCategoryId,
+        );
+        if (duplicateExists) return item;
+
+        const categories = item.categories.map((c) =>
+          c.categoryId === originalCategoryId ? updatedCategory : c,
+        );
+        return { ...item, categories };
+      });
+      saveUserOrganizations(items);
+      return items;
+    });
+  }
+
+  function handleDeleteCategory(cardId, categoryId) {
+    setUserOrganizations((prev) => {
+      const items = prev.map((item) => {
+        if (item.id !== cardId) return item;
+        return {
+          ...item,
+          categories: item.categories.filter((c) => c.categoryId !== categoryId),
+        };
+      });
+      saveUserOrganizations(items);
+      return items;
+    });
+  }
+
   function handleModalClose() {
-    setModalOpen(false);
-    setModalCardId(null);
+    setCategoryModal({
+      open: false,
+      mode: "add",
+      cardId: null,
+      categoryId: null,
+    });
   }
 
   function handleDragStart() {
@@ -175,7 +270,6 @@ export default function MainPage() {
                         className="focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                       >
                         <Card
-                          id={organization.id}
                           logo={organization.logo}
                           organizationName={organization.organizationName}
                           categories={organization.categories}
@@ -184,6 +278,9 @@ export default function MainPage() {
                           onEnterMoveMode={handleEnterMoveMode}
                           onEditClick={() => handleEditClick(organization.id)}
                           onPlusClick={() => handlePlusClick(organization.id)}
+                          onCategoryClick={({ categoryId }) =>
+                            handleCategoryClick(organization.id, categoryId)
+                          }
                         />
                       </div>
                     )}
@@ -201,19 +298,49 @@ export default function MainPage() {
       </div>
 
       <AddCategoryModal
-        isOpen={modalOpen}
+        key={`${categoryModal.mode}-${String(categoryModal.cardId)}-${String(
+          categoryModal.categoryId,
+        )}-${categoryModal.open ? "open" : "closed"}`}
+        isOpen={categoryModal.open}
         onClose={handleModalClose}
-        onSubmit={(newCategory) =>
-          modalCardId && handleAddCategory(modalCardId, newCategory)
-        }
+        mode={categoryModal.mode}
+        onSubmit={(category) => {
+          if (!categoryModal.cardId) return;
+          if (categoryModal.mode === "add") {
+            handleAddCategory(categoryModal.cardId, category);
+            return;
+          }
+          if (!categoryModal.categoryId) return;
+          handleUpdateCategory(
+            categoryModal.cardId,
+            categoryModal.categoryId,
+            category,
+          );
+        }}
+        onDelete={() => {
+          if (categoryModal.mode !== "edit") return;
+          if (!categoryModal.cardId || !categoryModal.categoryId) return;
+          handleDeleteCategory(categoryModal.cardId, categoryModal.categoryId);
+        }}
         organizationName={
-          userOrganizations.find((o) => o.id === modalCardId)?.organizationName ??
-          ""
+          userOrganizations.find((o) => o.id === categoryModal.cardId)
+            ?.organizationName ?? ""
         }
         existingCategoryIds={
-          userOrganizations.find((o) => o.id === modalCardId)?.categories?.map(
-            (c) => c.categoryId
-          ) ?? []
+          userOrganizations
+            .find((o) => o.id === categoryModal.cardId)
+            ?.categories?.map((c) => c.categoryId) ?? []
+        }
+        initialCategoryId={
+          categoryModal.mode === "edit" ? categoryModal.categoryId : null
+        }
+        initialPercent={
+          categoryModal.mode === "edit"
+            ? userOrganizations
+                .find((o) => o.id === categoryModal.cardId)
+                ?.categories?.find((c) => c.categoryId === categoryModal.categoryId)
+                ?.categoryPercent ?? null
+            : null
         }
       />
     </div>

@@ -8,27 +8,27 @@
         {
           "categoryId": "fuel",
           "categoryName": "Топливо",
-          "categoryProcent": "10%"
+          "categoryPercent": 10
         },
         {
           "categoryId": "groceries",
           "categoryName": "Продукты",
-          "categoryProcent": "13%"
+          "categoryPercent": 13
         },
         {
           "categoryId": "clothing",
           "categoryName": "Одежда",
-          "categoryProcent": "9%"
+          "categoryPercent": 9
         },
         {
           "categoryId": "books",
           "categoryName": "Книги",
-          "categoryProcent": "5%"
+          "categoryPercent": 5
         },
         {
           "categoryId": "electronics",
           "categoryName": "Электроника",
-          "categoryProcent": "7%"
+          "categoryPercent": 7
         }
       ]
     },
@@ -40,17 +40,17 @@
         {
           "categoryId": "transport",
           "categoryName": "Транспорт",
-          "categoryProcent": "10%"
+          "categoryPercent": 10
         },
         {
           "categoryId": "entertainment",
           "categoryName": "Развлечения",
-          "categoryProcent": "13%"
+          "categoryPercent": 13
         },
         {
           "categoryId": "health",
           "categoryName": "Здоровье",
-          "categoryProcent": "9%"
+          "categoryPercent": 9
         }
       ]
     },
@@ -62,37 +62,37 @@
         {
           "categoryId": "fuel",
           "categoryName": "Топливо",
-          "categoryProcent": "10%"
+          "categoryPercent": 10
         },
         {
           "categoryId": "groceries",
           "categoryName": "Продукты",
-          "categoryProcent": "13%"
+          "categoryPercent": 13
         },
         {
           "categoryId": "clothing",
           "categoryName": "Одежда",
-          "categoryProcent": "9%"
+          "categoryPercent": 9
         },
         {
           "categoryId": "books",
           "categoryName": "Книги",
-          "categoryProcent": "5%"
+          "categoryPercent": 5
         },
         {
           "categoryId": "electronics",
           "categoryName": "Электроника",
-          "categoryProcent": "7%"
+          "categoryPercent": 7
         },
         {
           "categoryId": "furniture",
           "categoryName": "Мебель",
-          "categoryProcent": "10%"
+          "categoryPercent": 10
         },
         {
           "categoryId": "other",
           "categoryName": "Другое",
-          "categoryProcent": "10%"
+          "categoryPercent": 10
         }
       ]
     },
@@ -104,17 +104,17 @@
         {
           "categoryId": "transport",
           "categoryName": "Транспорт",
-          "categoryProcent": "10%"
+          "categoryPercent": 10
         },
         {
           "categoryId": "entertainment",
           "categoryName": "Развлечения",
-          "categoryProcent": "13%"
+          "categoryPercent": 13
         },
         {
           "categoryId": "health",
           "categoryName": "Здоровье",
-          "categoryProcent": "9%"
+          "categoryPercent": 9
         }
       ]
     }
