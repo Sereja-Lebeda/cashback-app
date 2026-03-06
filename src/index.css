@@ -66,6 +66,21 @@ button {
   display: none; /* Chrome, Safari, Opera */
 }
 
+/* Скроллбар всегда виден (для списка категорий в модальном окне) */
+.scrollbar-visible {
+  scrollbar-width: thin; /* Firefox: тонкий скроллбар */
+}
+.scrollbar-visible::-webkit-scrollbar {
+  width: 8px; /* Chrome, Safari: видимый скроллбар */
+}
+.scrollbar-visible::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+.scrollbar-visible::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
 @keyframes shake {
   0%,
   100% {

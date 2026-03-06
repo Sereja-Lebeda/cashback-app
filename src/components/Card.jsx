@@ -1,26 +1,33 @@
 import DotsIcon from "../icons/DotsIcon";
+import PlusIcon from "../icons/PlusIcon";
 import DropMenu from "./DropMenu";
 
 export default function Card({
+  id,
   logo,
   organizationName,
   categories,
   isMoveMode,
+  isEditMode,
   onEnterMoveMode,
+  onEditClick,
+  onPlusClick,
 }) {
   const MAX_VISIBLE_CATEGORIES = 5;
   const hasOverflow = categories.length > MAX_VISIBLE_CATEGORIES;
-  const visibleCategories = hasOverflow
-    ? categories
-    : categories.slice(0, MAX_VISIBLE_CATEGORIES);
-  const placeholdersCount = hasOverflow
-    ? 0
-    : Math.max(0, MAX_VISIBLE_CATEGORIES - visibleCategories.length);
+  const visibleCategories =
+    hasOverflow || isEditMode
+      ? categories
+      : categories.slice(0, MAX_VISIBLE_CATEGORIES);
+  const placeholdersCount =
+    hasOverflow || isEditMode
+      ? 0
+      : Math.max(0, MAX_VISIBLE_CATEGORIES - visibleCategories.length);
 
   return (
     <div
       data-card
-      className={`relative flex flex-col items-center gap-2 shrink-0 min-w-[calc(100vw/3-1.5rem)] max-w-[calc(100vw/3-1.5rem)] bg-card-bg border-3 border-card-border rounded-lg py-2 px-1 ${
+      className={`relative flex flex-col items-center gap-2 shrink-0 min-w-[calc(100vw/3-1.5rem)] max-w-[calc(100vw/3-1.5rem)] h-[420px] bg-card-bg border-3 border-card-border rounded-lg py-2 px-1 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 ${
         isMoveMode ? "animate-shake" : ""
       }`}
     >
@@ -36,35 +43,36 @@ export default function Card({
         </span>
       </div>
 
-      {/* Строка 2: Категории */}
-      <div className="relative pt-2">
+      {/* Строка 2: Категории (фиксированный грид — 5 строк по 52px) */}
+      <div
+        className={`relative pt-2 ${isEditMode ? "h-[270px]" : "h-[310px]"}`}
+      >
         <div
-          className={`grid grid-rows-auto gap-2 w-full select-none ${
-            hasOverflow ? "max-h-[310px] overflow-y-auto no-scrollbar pb-4" : ""
+          className={`grid auto-rows-[52px] gap-2 w-full select-none h-full ${
+            hasOverflow || isEditMode ? "overflow-y-auto no-scrollbar pb-4" : ""
           }`}
         >
           {visibleCategories.map((category, index) => (
             <div
               key={category.categoryId ?? index}
-              className="flex flex-col items-center justify-center"
+              className="flex flex-col items-center justify-center min-h-0"
             >
-              {/* Фиксированная высота для названия - всегда 2 строки */}
               <div className="h-8 flex items-center justify-center px-2">
                 <span className="text-center wrap-break-words text-sm line-clamp-2">
                   {category.categoryName}
                 </span>
               </div>
-              {/* Процент всегда на одном уровне */}
               <span className="font-semibold text-base">
                 {category.categoryProcent}
               </span>
             </div>
           ))}
           {!hasOverflow &&
+            !isEditMode &&
             Array.from({ length: placeholdersCount }).map((_, index) => (
               <div
                 key={`placeholder-${index}`}
-                className="flex flex-col items-center justify-center opacity-0 pointer-events-none"
+                className="flex flex-col items-center justify-center opacity-0 pointer-events-none min-h-0"
               >
                 <div className="h-8 flex items-center justify-center px-2">
                   <span className="text-sm">-</span>
@@ -74,16 +82,31 @@ export default function Card({
             ))}
         </div>
 
-        {/* Градиент внизу, подсказывающий, что список прокручиваемый */}
-        {hasOverflow && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-linear-to-t from-card-bg to-transparent" />
+        {(hasOverflow || isEditMode) && (
+          <>
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-card-bg to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-card-bg to-transparent z-10" />
+          </>
         )}
       </div>
+
+      {/* Плюс — последний элемент карточки, вне грида категорий */}
+      {isEditMode && (
+        <button
+          type="button"
+          onClick={onPlusClick}
+          className="flex items-center justify-center w-full py-3 rounded-lg border-2 border-dashed border-card-border hover:bg-card-hover/30 transition-colors shrink-0"
+          aria-label="Добавить категорию"
+        >
+          <PlusIcon className="w-6 h-6" />
+        </button>
+      )}
 
       {/* Абсолют кнопка (позиционируется относительно всей карточки) */}
       <DropMenu
         className="absolute left-20 top-1"
         onMoveClick={onEnterMoveMode}
+        onEditClick={onEditClick}
       >
         <DotsIcon className="w-5 h-5" />
       </DropMenu>
