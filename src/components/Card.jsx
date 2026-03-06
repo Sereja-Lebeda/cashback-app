@@ -84,8 +84,8 @@ export default function Card({
 
         {(hasOverflow || isEditMode) && (
           <>
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-card-bg to-transparent z-10" />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-card-bg to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-8 bg-linear-to-b from-card-bg to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-card-bg via-card-bg/80 to-transparent z-10" />
           </>
         )}
       </div>

@@ -49,9 +49,9 @@ export default function Footer() {
   const randomQuote = Quotes[Math.floor(Math.random() * Quotes.length)];
 
   return (
-    <div className="flex flex-col justify-center items-center w-full h-full gap-2">
+    <div className="flex flex-col justify-center items-center w-full h-[80px] shrink-0 gap-2">
       {/* TODO: add dynamic quotes */}
-      <span className="text-md font-bold text-text-primary text-center">
+      <span className="text-md font-bold text-text-primary text-center line-clamp-2">
         {randomQuote.quote}
       </span>
       <span className="text-md text-text-primary text-center">
