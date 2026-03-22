@@ -31,7 +31,7 @@ export default function Card({
   return (
     <div
       data-card
-      className={`relative flex flex-col items-center gap-2 shrink-0 min-w-[calc(100vw/3-1.5rem)] max-w-[calc(100vw/3-1.5rem)] h-[420px] bg-card-bg border-3 border-card-border rounded-lg py-2 px-1 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 select-none ${
+      className={`relative flex flex-col items-center gap-2 shrink-0 w-[110px] h-[420px] bg-card-bg border-3 border-card-border rounded-lg py-2 px-1 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 select-none ${
         isMoveMode ? "animate-shake" : ""
       }`}
     >
@@ -151,7 +151,7 @@ export default function Card({
 
       {/* Абсолют кнопка (позиционируется относительно всей карточки) */}
       <DropMenu
-        className="absolute left-20 top-1"
+        className="absolute left-22 top-1"
         onMoveClick={onEnterMoveMode}
         onEditClick={onEditClick}
         onDuplicateClick={onDuplicateClick}

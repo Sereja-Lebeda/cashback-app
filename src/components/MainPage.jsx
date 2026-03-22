@@ -5,6 +5,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import Card from "./Card";
 import AddCategoryModal from "./AddCategoryModal";
+import AddCardModal from "./AddCardModal";
 import ChangeBankModal from "./ChangeBankModal";
 import ConfirmActionModal from "./ConfirmActionModal";
 import data from "../data.json";
@@ -120,6 +121,7 @@ export default function MainPage() {
     open: false,
     cardId: null,
   });
+  const [addCardModalOpen, setAddCardModalOpen] = useState(false);
   const [deletingCardId, setDeletingCardId] = useState(null);
   const [lastAddedCardId, setLastAddedCardId] = useState(null);
   const justDraggedRef = useRef(false);
@@ -316,6 +318,26 @@ export default function MainPage() {
     }
   }
 
+  function handleAddCard(newCard) {
+    let newId;
+    setUserOrganizations((prev) => {
+      const maxId = Math.max(...prev.map((o) => o.id), 0);
+      newId = maxId + 1;
+      const org = organizations.find((o) => o.id === newCard.organizationId);
+      const newItem = {
+        id: newId,
+        organizationId: newCard.organizationId,
+        organizationName: newCard.organizationName,
+        logo: org?.logo,
+        categories: newCard.categories,
+      };
+      const items = [...prev, newItem];
+      saveUserOrganizations(items);
+      return items;
+    });
+    setLastAddedCardId(newId);
+  }
+
   function handleDuplicateCard(cardId) {
     setUserOrganizations((prev) => {
       const idx = prev.findIndex((o) => o.id === cardId);
@@ -349,6 +371,7 @@ export default function MainPage() {
       const onCard = event.target.closest("[data-card]");
       const onMenu = event.target.closest("[data-headlessui-state]");
       const onCategoryModal = event.target.closest("[data-add-category-modal]");
+      const onAddCardModal = event.target.closest("[data-add-card-modal]");
       const onBankModalEl = event.target.closest("[data-change-bank-modal]");
       const onConfirmModal = event.target.closest(
         "[data-confirm-action-modal]",
@@ -358,6 +381,7 @@ export default function MainPage() {
         !onCard &&
         !onMenu &&
         !onCategoryModal &&
+        !onAddCardModal &&
         !onBankModalEl &&
         !onConfirmModal
       ) {
@@ -375,7 +399,7 @@ export default function MainPage() {
 
   return (
     <div className="flex flex-col justify-between items-center h-full">
-      <Header />
+      <Header onAddCardClick={() => setAddCardModalOpen(true)} />
 
       <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
         {/* Внешний контейнер: окно с горизонтальным скроллом */}
@@ -500,6 +524,15 @@ export default function MainPage() {
                 ?.categoryPercent ?? null
             : null
         }
+      />
+
+      <AddCardModal
+        isOpen={addCardModalOpen}
+        onClose={() => setAddCardModalOpen(false)}
+        onSubmit={(newCard) => {
+          handleAddCard(newCard);
+          setAddCardModalOpen(false);
+        }}
       />
 
       <ChangeBankModal

@@ -28,6 +28,7 @@
 
   color-scheme: light dark;
   background-color: #e8efdc;
+
   /* #0217bb5c; */
 
   font-synthesis: none;
@@ -35,6 +36,8 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   height: 100vh;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 body {
