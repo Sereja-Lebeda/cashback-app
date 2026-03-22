@@ -4,24 +4,104 @@ const categories = [
     name: "Все покупки",
   },
   {
-    id: "fuel",
-    name: "Топливо",
+    id: "supermarkets",
+    name: "Супермаркеты",
   },
   {
-    id: "groceries",
-    name: "Продукты",
+    id: "pharmacy",
+    name: "Аптеки",
+  },
+  {
+    id: "fuel",
+    name: "АЗС",
+  },
+  {
+    id: "taxi",
+    name: "Такси",
+  },
+  {
+    id: "public_transport",
+    name: "Общественный транспорт",
+  },
+  {
+    id: "restaurants",
+    name: "Рестораны и кафе",
+  },
+  {
+    id: "food_delivery",
+    name: "Доставка еды",
+  },
+  {
+    id: "marketplaces",
+    name: "Маркетплейсы",
+  },
+  {
+    id: "electronics",
+    name: "Электроника",
   },
   {
     id: "clothing",
     name: "Одежда",
   },
   {
-    id: "books",
-    name: "Книги",
+    id: "flights",
+    name: "Авиабилеты",
   },
   {
-    id: "electronics",
-    name: "Электроника",
+    id: "rail_tickets",
+    name: "Ж/д билеты",
+  },
+  {
+    id: "hotels",
+    name: "Отели",
+  },
+  {
+    id: "carsharing",
+    name: "Каршеринг",
+  },
+  {
+    id: "cinemas",
+    name: "Кинотеатры",
+  },
+  {
+    id: "streaming",
+    name: "Подписки",
+  },
+  {
+    id: "games",
+    name: "Видеоигры",
+  },
+  {
+    id: "fitness",
+    name: "Фитнес",
+  },
+  {
+    id: "beauty",
+    name: "Салоны красоты",
+  },
+  {
+    id: "home_goods",
+    name: "Товары для дома",
+  },
+  {
+    id: "pet_supplies",
+    name: "Зоотовары",
+  },
+  {
+    id: "education",
+    name: "Образование",
+  },
+  {
+    id: "utilities",
+    name: "ЖКХ",
+  },
+  {
+    id: "groceries",
+    name: "Продукты",
+  },
+  {
+    id: "books",
+    name: "Книги",
   },
   {
     id: "furniture",
