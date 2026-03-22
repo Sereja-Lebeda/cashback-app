@@ -1,10 +1,14 @@
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { ExclamationTriangleIcon, XMarkIcon } from "@heroicons/react/16/solid";
 
-export default function ConfirmDeleteCardModal({
+export default function ConfirmActionModal({
   isOpen,
   onClose,
   onConfirm,
+  title,
+  description,
+  confirmLabel,
+  cancelLabel = "Отмена",
 }) {
   function handleConfirm() {
     onConfirm();
@@ -16,19 +20,19 @@ export default function ConfirmDeleteCardModal({
       open={isOpen}
       onClose={onClose}
       className="relative z-50"
-      data-confirm-delete-modal
+      data-confirm-action-modal
     >
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
 
       <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
         <DialogPanel
-          data-confirm-delete-modal
+          data-confirm-action-modal
           className="mx-auto max-w-md w-full rounded-2xl border border-border bg-bg-primary p-6 shadow-xl"
         >
           <div className="flex items-start justify-between gap-4">
             <DialogTitle className="text-lg font-semibold text-text-primary flex items-center gap-2">
               <ExclamationTriangleIcon className="size-6 text-amber-500 shrink-0" />
-              Удалить карточку?
+              {title}
             </DialogTitle>
 
             <button
@@ -41,10 +45,7 @@ export default function ConfirmDeleteCardModal({
             </button>
           </div>
 
-          <p className="mt-3 text-text-secondary">
-            Вы действительно хотите удалить эту карточку? Это действие нельзя
-            отменить.
-          </p>
+          <p className="mt-3 text-text-secondary">{description}</p>
 
           <div className="flex gap-2 mt-6">
             <button
@@ -52,14 +53,14 @@ export default function ConfirmDeleteCardModal({
               onClick={onClose}
               className="flex-1 py-2.5 rounded-lg border border-border text-text-secondary hover:bg-bg-secondary transition-colors"
             >
-              Отмена
+              {cancelLabel}
             </button>
             <button
               type="button"
               onClick={handleConfirm}
               className="flex-1 py-2.5 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-colors"
             >
-              Удалить
+              {confirmLabel}
             </button>
           </div>
         </DialogPanel>

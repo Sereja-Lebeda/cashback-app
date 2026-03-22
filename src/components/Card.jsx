@@ -15,6 +15,7 @@ export default function Card({
   onBankClick,
   onDuplicateClick,
   onDeleteClick,
+  onCategoryWipeClick,
 }) {
   const MAX_VISIBLE_CATEGORIES = 5;
   const hasOverflow = categories.length > MAX_VISIBLE_CATEGORIES;
@@ -155,6 +156,7 @@ export default function Card({
         onEditClick={onEditClick}
         onDuplicateClick={onDuplicateClick}
         onDeleteClick={onDeleteClick}
+        onCategoryWipeClick={onCategoryWipeClick}
       >
         <DotsIcon className="w-5 h-5" />
       </DropMenu>

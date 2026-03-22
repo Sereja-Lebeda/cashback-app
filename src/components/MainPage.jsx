@@ -6,7 +6,7 @@ import Footer from "./Footer";
 import Card from "./Card";
 import AddCategoryModal from "./AddCategoryModal";
 import ChangeBankModal from "./ChangeBankModal";
-import ConfirmDeleteCardModal from "./ConfirmDeleteCardModal";
+import ConfirmActionModal from "./ConfirmActionModal";
 import data from "../data.json";
 import organizations from "../organizations";
 
@@ -116,6 +116,10 @@ export default function MainPage() {
     open: false,
     cardId: null,
   });
+  const [clearConfirmModal, setClearConfirmModal] = useState({
+    open: false,
+    cardId: null,
+  });
   const [deletingCardId, setDeletingCardId] = useState(null);
   const [lastAddedCardId, setLastAddedCardId] = useState(null);
   const justDraggedRef = useRef(false);
@@ -200,6 +204,17 @@ export default function MainPage() {
     });
   }
 
+  function handleCategoryWipeClick(cardId) {
+    setUserOrganizations((prev) => {
+      const items = prev.map((item) => {
+        if (item.id !== cardId) return item;
+        return { ...item, categories: [] };
+      });
+      saveUserOrganizations(items);
+      return items;
+    });
+  }
+
   function handleModalClose() {
     setCategoryModal({
       open: false,
@@ -261,6 +276,10 @@ export default function MainPage() {
 
   function requestDeleteCard(cardId) {
     setDeleteConfirmModal({ open: true, cardId });
+  }
+
+  function requestClearCategories(cardId) {
+    setClearConfirmModal({ open: true, cardId });
   }
 
   function performDeleteCard(cardId) {
@@ -331,8 +350,8 @@ export default function MainPage() {
       const onMenu = event.target.closest("[data-headlessui-state]");
       const onCategoryModal = event.target.closest("[data-add-category-modal]");
       const onBankModalEl = event.target.closest("[data-change-bank-modal]");
-      const onConfirmDeleteModal = event.target.closest(
-        "[data-confirm-delete-modal]",
+      const onConfirmModal = event.target.closest(
+        "[data-confirm-action-modal]",
       );
 
       if (
@@ -340,7 +359,7 @@ export default function MainPage() {
         !onMenu &&
         !onCategoryModal &&
         !onBankModalEl &&
-        !onConfirmDeleteModal
+        !onConfirmModal
       ) {
         setIsMoveMode(false);
         setEditingCardId(null);
@@ -415,6 +434,9 @@ export default function MainPage() {
                             }
                             onDeleteClick={() =>
                               requestDeleteCard(organization.id)
+                            }
+                            onCategoryWipeClick={() =>
+                              requestClearCategories(organization.id)
                             }
                           />
                         </div>
@@ -493,12 +515,30 @@ export default function MainPage() {
         }
       />
 
-      <ConfirmDeleteCardModal
+      <ConfirmActionModal
         isOpen={deleteConfirmModal.open}
         onClose={() =>
           setDeleteConfirmModal({ open: false, cardId: null })
         }
         onConfirm={handleDeleteConfirm}
+        title="Удалить карточку?"
+        description="Вы действительно хотите удалить эту карточку? Это действие нельзя отменить."
+        confirmLabel="Удалить"
+      />
+
+      <ConfirmActionModal
+        isOpen={clearConfirmModal.open}
+        onClose={() =>
+          setClearConfirmModal({ open: false, cardId: null })
+        }
+        onConfirm={() => {
+          if (clearConfirmModal.cardId != null) {
+            handleCategoryWipeClick(clearConfirmModal.cardId);
+          }
+        }}
+        title="Очистить категории?"
+        description="Вы действительно хотите удалить все категории у этой карточки? Это действие нельзя отменить."
+        confirmLabel="Очистить"
       />
     </div>
   );

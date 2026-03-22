@@ -4,6 +4,7 @@ import {
   Square2StackIcon,
   TrashIcon,
   Bars3Icon,
+  BackspaceIcon,
 } from "@heroicons/react/16/solid";
 
 export default function DropMenu({
@@ -13,6 +14,7 @@ export default function DropMenu({
   onEditClick,
   onDuplicateClick,
   onDeleteClick,
+  onCategoryWipeClick,
 }) {
   return (
     <Menu>
@@ -58,6 +60,17 @@ export default function DropMenu({
           </button>
         </MenuItem>
         <div className="h-px bg-white/20 my-0.5 mx-1 shrink-0" />
+
+        <MenuItem>
+          <button
+            type="button"
+            onClick={onCategoryWipeClick}
+            className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 bg-text-secondary focus:outline-none focus:ring-0 focus-visible:ring-0"
+          >
+            <BackspaceIcon className="size-4 fill-white/30" />
+            Clear
+          </button>
+        </MenuItem>
 
         <MenuItem>
           <button
