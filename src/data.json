@@ -37,33 +37,8 @@
     },
     {
       "id": 2,
-      "organizationId": "sberBank",
-      "organizationName": "Сбербанк",
-      "resetCategoriesEnabled": false,
-      "resetCategoriesDay": null,
-      "lastCategoriesResetAt": null,
-      "categories": [
-        {
-          "categoryId": "transport",
-          "categoryName": "Транспорт",
-          "categoryPercent": 10
-        },
-        {
-          "categoryId": "entertainment",
-          "categoryName": "Развлечения",
-          "categoryPercent": 13
-        },
-        {
-          "categoryId": "health",
-          "categoryName": "Здоровье",
-          "categoryPercent": 9
-        }
-      ]
-    },
-    {
-      "id": 3,
-      "organizationId": "alphaBank",
-      "organizationName": "Альфа-Банк",
+      "organizationId": "rosselkhozbank",
+      "organizationName": "Россельхозбанк",
       "resetCategoriesEnabled": true,
       "resetCategoriesDay": 15,
       "lastCategoriesResetAt": null,
@@ -106,9 +81,9 @@
       ]
     },
     {
-      "id": 4,
-      "organizationId": "sberBank",
-      "organizationName": "Сбербанк",
+      "id": 3,
+      "organizationId": "ozonBank",
+      "organizationName": "Ozon Банк",
       "resetCategoriesEnabled": false,
       "resetCategoriesDay": null,
       "lastCategoriesResetAt": null,
