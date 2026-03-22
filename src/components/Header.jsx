@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
+import { initDataUser } from "@telegram-apps/sdk";
 
 function getTimeParts() {
   const d = new Date();
@@ -24,8 +25,18 @@ function TimePart({ value }) {
   );
 }
 
+function getDisplayName() {
+  try {
+    const user = initDataUser?.();
+    return user?.username || user?.first_name || "Миллионер";
+  } catch {
+    return "Миллионер";
+  }
+}
+
 export default function Header({ onAddCardClick = () => {} }) {
   const [timeParts, setTimeParts] = useState(getTimeParts);
+  const displayName = getDisplayName();
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -48,7 +59,7 @@ export default function Header({ onAddCardClick = () => {} }) {
 
       {/* col-2 row-1: Привет, Пупа-Лупа — самая широкая колонка */}
       <div className="col-start-2 row-start-1 flex items-end justify-center text-xl">
-        <span>Привет, Пупа-Лупа</span>
+        <span>Привет, {displayName}</span>
       </div>
 
       {/* col-2 row-2: Time */}
