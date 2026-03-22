@@ -4,6 +4,9 @@
       "id": 1,
       "organizationId": "alphaBank",
       "organizationName": "Альфа-Банк",
+      "resetCategoriesEnabled": false,
+      "resetCategoriesDay": null,
+      "lastCategoriesResetAt": null,
       "categories": [
         {
           "categoryId": "fuel",
@@ -36,6 +39,9 @@
       "id": 2,
       "organizationId": "sberBank",
       "organizationName": "Сбербанк",
+      "resetCategoriesEnabled": false,
+      "resetCategoriesDay": null,
+      "lastCategoriesResetAt": null,
       "categories": [
         {
           "categoryId": "transport",
@@ -58,6 +64,9 @@
       "id": 3,
       "organizationId": "alphaBank",
       "organizationName": "Альфа-Банк",
+      "resetCategoriesEnabled": true,
+      "resetCategoriesDay": 15,
+      "lastCategoriesResetAt": null,
       "categories": [
         {
           "categoryId": "fuel",
@@ -100,6 +109,9 @@
       "id": 4,
       "organizationId": "sberBank",
       "organizationName": "Сбербанк",
+      "resetCategoriesEnabled": false,
+      "resetCategoriesDay": null,
+      "lastCategoriesResetAt": null,
       "categories": [
         {
           "categoryId": "transport",

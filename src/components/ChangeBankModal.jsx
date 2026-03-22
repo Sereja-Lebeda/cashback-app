@@ -1,26 +1,68 @@
-import { useMemo, useState } from "react";
-import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Checkbox,
+  Dialog,
+  DialogPanel,
+  DialogTitle,
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
+} from "@headlessui/react";
 import {
   MagnifyingGlassIcon,
   CheckIcon,
+  ChevronUpDownIcon,
   XMarkIcon,
 } from "@heroicons/react/16/solid";
 import organizations from "../organizations";
+import { ResetDayInput } from "./ResetDayInput";
 
 export default function ChangeBankModal({
   isOpen,
   onClose,
   onSubmit,
   currentOrganizationId = null,
+  initialResetCategoriesEnabled = false,
+  initialResetCategoriesDay = null,
 }) {
   const [search, setSearch] = useState("");
   const [selectedOrgId, setSelectedOrgId] = useState(currentOrganizationId);
+  const [resetCategoriesEnabled, setResetCategoriesEnabled] = useState(
+    initialResetCategoriesEnabled,
+  );
+  const [resetCategoriesDay, setResetCategoriesDay] = useState(
+    initialResetCategoriesDay ?? 1,
+  );
+  const [resetCategoriesMode, setResetCategoriesMode] = useState(() => {
+    const day = initialResetCategoriesDay ?? 1;
+    return day === 1 ? "first" : day === 31 ? "last" : "specific";
+  });
+  const [specificDayInput, setSpecificDayInput] = useState(() =>
+    String(initialResetCategoriesDay ?? 15),
+  );
+
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedOrgId(currentOrganizationId);
+      setResetCategoriesEnabled(initialResetCategoriesEnabled);
+      const day = initialResetCategoriesDay ?? 1;
+      setResetCategoriesDay(day);
+      setResetCategoriesMode(
+        day === 1 ? "first" : day === 31 ? "last" : "specific",
+      );
+      setSpecificDayInput(String(day >= 2 && day <= 30 ? day : 15));
+    }
+  }, [
+    isOpen,
+    currentOrganizationId,
+    initialResetCategoriesEnabled,
+    initialResetCategoriesDay,
+  ]);
 
   const filteredOrganizations = useMemo(() => {
     const q = search.toLowerCase().trim();
-    return organizations.filter((org) =>
-      org.name.toLowerCase().includes(q),
-    );
+    return organizations.filter((org) => org.name.toLowerCase().includes(q));
   }, [search]);
 
   const selectedOrganization =
@@ -29,13 +71,30 @@ export default function ChangeBankModal({
   function handleSubmit(e) {
     e.preventDefault();
     if (!selectedOrganization) return;
-    onSubmit(selectedOrganization.id);
+    onSubmit({
+      organizationId: selectedOrganization.id,
+      resetCategoriesEnabled,
+      resetCategoriesDay: resetCategoriesEnabled ? resetCategoriesDay : null,
+    });
     handleClose();
   }
 
   function handleClose() {
     setSearch("");
     setSelectedOrgId(currentOrganizationId);
+    setResetCategoriesEnabled(initialResetCategoriesEnabled);
+    setResetCategoriesDay(initialResetCategoriesDay ?? 1);
+      setResetCategoriesMode(
+        (initialResetCategoriesDay ?? 1) === 1
+          ? "first"
+          : (initialResetCategoriesDay ?? 1) === 31
+            ? "last"
+            : "specific",
+      );
+      const day = initialResetCategoriesDay ?? 1;
+      setSpecificDayInput(
+        String(day >= 2 && day <= 30 ? day : 15),
+      );
     onClose();
   }
 
@@ -122,6 +181,130 @@ export default function ChangeBankModal({
               </div>
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-text-secondary mb-2">
+                Обнуление категорий
+              </label>
+              <div className="space-y-2 border border-bg-secondary rounded-lg p-2">
+                <label
+                  onClick={() =>
+                    setResetCategoriesEnabled((prev) => !prev)
+                  }
+                  className="flex items-center gap-3 h-9 px-3 rounded-lg border border-border bg-bg-secondary cursor-pointer hover:bg-bg-primary transition-colors focus-within:ring-2 focus-within:ring-accent focus-within:outline-none"
+                >
+                  <Checkbox
+                    checked={resetCategoriesEnabled}
+                    onChange={setResetCategoriesEnabled}
+                    onClick={(e) => e.stopPropagation()}
+                    className="group flex size-4 shrink-0 items-center justify-center rounded border-2 border-border bg-bg-secondary transition-colors data-checked:border-accent data-checked:bg-accent focus:outline-none focus:ring-0"
+                  >
+                    <CheckIcon className="size-2.5 text-white opacity-0 group-data-checked:opacity-100" />
+                  </Checkbox>
+                  <span className="text-sm text-text-primary">
+                    Обнулять категории?
+                  </span>
+                </label>
+                {resetCategoriesEnabled ? (
+                  <div className="space-y-2">
+                    <label className="block text-xs text-text-secondary mb-1">
+                      День месяца для обнуления
+                    </label>
+                    <Listbox
+                      as="div"
+                      value={resetCategoriesMode}
+                      onChange={(mode) => {
+                        setResetCategoriesMode(mode);
+                        if (mode === "first") setResetCategoriesDay(1);
+                        else if (mode === "last") setResetCategoriesDay(31);
+                        else {
+                          const day =
+                            resetCategoriesDay >= 2 &&
+                            resetCategoriesDay <= 30
+                              ? resetCategoriesDay
+                              : 15;
+                          setResetCategoriesDay(day);
+                          setSpecificDayInput(String(day));
+                        }
+                      }}
+                      className="relative"
+                    >
+                      <ListboxButton className="flex w-full items-center justify-between gap-2 h-9 px-3 rounded-lg border border-border bg-bg-primary text-left text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent min-w-0">
+                        <span className="pl-3">
+                          {resetCategoriesMode === "first"
+                            ? "Первый день месяца"
+                            : resetCategoriesMode === "last"
+                              ? "Последний день месяца"
+                              : "Конкретное число"}
+                        </span>
+                        <ChevronUpDownIcon className="size-4 shrink-0 text-text-secondary" />
+                      </ListboxButton>
+                      <ListboxOptions
+                        anchor={{ to: "bottom start", gap: 4, padding: 8 }}
+                        className="z-60 min-w-(--button-width) overflow-y-auto rounded-lg border border-border bg-bg-primary py-1 shadow-lg"
+                      >
+                        <ListboxOption
+                          value="first"
+                          className="cursor-pointer px-3 py-2 text-sm text-text-primary data-focus:bg-bg-secondary"
+                        >
+                          Первый день месяца
+                        </ListboxOption>
+                        <ListboxOption
+                          value="last"
+                          className="cursor-pointer px-3 py-2 text-sm text-text-primary data-focus:bg-bg-secondary"
+                        >
+                          Последний день месяца
+                        </ListboxOption>
+                        <ListboxOption
+                          value="specific"
+                          className="cursor-pointer px-3 py-2 text-sm text-text-primary data-focus:bg-bg-secondary"
+                        >
+                          Конкретное число
+                        </ListboxOption>
+                      </ListboxOptions>
+                    </Listbox>
+                    {resetCategoriesMode === "specific" && (
+                      <div>
+                        <label className="block text-xs text-text-secondary mb-1">
+                          Число (1–31)
+                        </label>
+                        <ResetDayInput
+                          inputValue={specificDayInput}
+                          onInputChange={setSpecificDayInput}
+                          dayValue={resetCategoriesDay}
+                          onDayChange={setResetCategoriesDay}
+                          onSwitchToLast={() => {
+                            setResetCategoriesMode("last");
+                            setResetCategoriesDay(31);
+                          }}
+                          className="w-full h-9 px-3 rounded-lg border border-border bg-bg-primary text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                        />
+                        <p className="mt-1 text-xs text-text-secondary">
+                          {resetCategoriesDay === 31
+                            ? "Обнуление 28–31 числа в зависимости от месяца"
+                            : `${resetCategoriesDay}-е число каждого месяца`}
+                        </p>
+                      </div>
+                    )}
+                    {resetCategoriesMode === "first" && (
+                      <p className="text-xs text-text-secondary">
+                        1-е число каждого месяца
+                      </p>
+                    )}
+                    {resetCategoriesMode === "last" && (
+                      <p className="text-xs text-text-secondary">
+                        Обнуление 28–31 числа в зависимости от месяца
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-xs text-text-secondary">
+                    Опция не выбрана. Включите, чтобы категории автоматически
+                    обнулялись в выбранный день месяца.
+                  </p>
+                )}
+              </div>
+            </div>
+
             <div className="flex gap-2 pt-2">
               <button
                 type="button"
@@ -144,4 +327,3 @@ export default function ChangeBankModal({
     </Dialog>
   );
 }
-

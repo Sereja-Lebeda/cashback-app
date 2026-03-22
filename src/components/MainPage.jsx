@@ -43,6 +43,14 @@ function normalizeUserOrganization(userOrg) {
     categories: Array.isArray(userOrg.categories)
       ? userOrg.categories.map(normalizeCategory)
       : [],
+    resetCategoriesEnabled: Boolean(userOrg.resetCategoriesEnabled),
+    resetCategoriesDay:
+      typeof userOrg.resetCategoriesDay === "number" &&
+      userOrg.resetCategoriesDay >= 1 &&
+      userOrg.resetCategoriesDay <= 31
+        ? userOrg.resetCategoriesDay
+        : null,
+    lastCategoriesResetAt: userOrg.lastCategoriesResetAt ?? null,
   };
 }
 
@@ -233,17 +241,32 @@ export default function MainPage() {
     });
   }
 
-  function handleChangeBank(cardId, organizationId) {
+  function handleChangeBank(cardId, payload) {
+    const organizationId =
+      typeof payload === "object" ? payload.organizationId : payload;
+    const resetCategoriesEnabled =
+      typeof payload === "object" ? payload.resetCategoriesEnabled : undefined;
+    const resetCategoriesDay =
+      typeof payload === "object" ? payload.resetCategoriesDay : undefined;
+
     setUserOrganizations((prev) => {
       const items = prev.map((item) => {
         if (item.id !== cardId) return item;
         const org = organizations.find((o) => o.id === organizationId);
-        return {
+        const base = {
           ...item,
           organizationId: org?.id ?? item.organizationId,
           organizationName: org?.name ?? item.organizationName,
           logo: org?.logo,
         };
+        if (resetCategoriesEnabled !== undefined) {
+          base.resetCategoriesEnabled = Boolean(resetCategoriesEnabled);
+          base.resetCategoriesDay =
+            resetCategoriesEnabled && resetCategoriesDay != null
+              ? resetCategoriesDay
+              : null;
+        }
+        return base;
       });
       saveUserOrganizations(items);
       return items;
@@ -330,6 +353,12 @@ export default function MainPage() {
         organizationName: newCard.organizationName,
         logo: org?.logo,
         categories: newCard.categories,
+        resetCategoriesEnabled: Boolean(newCard.resetCategoriesEnabled),
+        resetCategoriesDay:
+          newCard.resetCategoriesEnabled && newCard.resetCategoriesDay != null
+            ? newCard.resetCategoriesDay
+            : null,
+        lastCategoriesResetAt: null,
       };
       const items = [...prev, newItem];
       saveUserOrganizations(items);
@@ -349,6 +378,9 @@ export default function MainPage() {
         ...source,
         id: newId,
         categories: source.categories.map((c) => ({ ...c })),
+        resetCategoriesEnabled: source.resetCategoriesEnabled ?? false,
+        resetCategoriesDay: source.resetCategoriesDay ?? null,
+        lastCategoriesResetAt: null,
       };
       const items = [...prev];
       items.splice(idx + 1, 0, newCard);
@@ -361,6 +393,56 @@ export default function MainPage() {
   function handleCardAppearAnimationEnd() {
     setLastAddedCardId(null);
   }
+
+  useEffect(() => {
+    function checkAndResetCategories() {
+      const today = new Date();
+      const todayDay = today.getDate();
+      const lastDayOfMonth = new Date(
+        today.getFullYear(),
+        today.getMonth() + 1,
+        0,
+      ).getDate();
+      const monthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+
+      setUserOrganizations((prev) => {
+        let changed = false;
+        const next = prev.map((item) => {
+          if (
+            !item.resetCategoriesEnabled ||
+            item.resetCategoriesDay == null ||
+            item.lastCategoriesResetAt === monthKey
+          ) {
+            return item;
+          }
+          const isResetDay =
+            item.resetCategoriesDay === 31
+              ? todayDay === lastDayOfMonth
+              : todayDay === item.resetCategoriesDay;
+          if (!isResetDay) return item;
+          changed = true;
+          return {
+            ...item,
+            categories: [],
+            lastCategoriesResetAt: monthKey,
+          };
+        });
+        if (changed) saveUserOrganizations(next);
+        return next;
+      });
+    }
+
+    checkAndResetCategories();
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        checkAndResetCategories();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
 
   useEffect(() => {
     if (!isMoveMode && editingCardId === null) return;
@@ -538,13 +620,21 @@ export default function MainPage() {
       <ChangeBankModal
         isOpen={bankModal.open}
         onClose={handleBankModalClose}
-        onSubmit={(organizationId) => {
+        onSubmit={(payload) => {
           if (!bankModal.cardId) return;
-          handleChangeBank(bankModal.cardId, organizationId);
+          handleChangeBank(bankModal.cardId, payload);
         }}
         currentOrganizationId={
           userOrganizations.find((o) => o.id === bankModal.cardId)
             ?.organizationId ?? null
+        }
+        initialResetCategoriesEnabled={
+          userOrganizations.find((o) => o.id === bankModal.cardId)
+            ?.resetCategoriesEnabled ?? false
+        }
+        initialResetCategoriesDay={
+          userOrganizations.find((o) => o.id === bankModal.cardId)
+            ?.resetCategoriesDay ?? null
         }
       />
 

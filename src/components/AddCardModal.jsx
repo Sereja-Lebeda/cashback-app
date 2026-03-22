@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import {
+  Checkbox,
   Dialog,
   DialogPanel,
   DialogTitle,
@@ -18,6 +19,7 @@ import {
 } from "@heroicons/react/16/solid";
 import organizations from "../organizations";
 import categories from "../categories";
+import { ResetDayInput } from "./ResetDayInput";
 
 function parsePercentToNumber(value) {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -39,6 +41,10 @@ export default function AddCardModal({ isOpen, onClose, onSubmit }) {
   const [categoryRows, setCategoryRows] = useState([
     { categoryId: "", categoryPercent: "" },
   ]);
+  const [resetCategoriesEnabled, setResetCategoriesEnabled] = useState(false);
+  const [resetCategoriesDay, setResetCategoriesDay] = useState(1);
+  const [resetCategoriesMode, setResetCategoriesMode] = useState("first");
+  const [specificDayInput, setSpecificDayInput] = useState("15");
 
   const filteredOrganizations = useMemo(() => {
     const q = bankSearch.toLowerCase().trim();
@@ -113,6 +119,8 @@ export default function AddCardModal({ isOpen, onClose, onSubmit }) {
       organizationId: selectedOrganization.id,
       organizationName: selectedOrganization.name,
       categories: validCategories,
+      resetCategoriesEnabled,
+      resetCategoriesDay: resetCategoriesEnabled ? resetCategoriesDay : null,
     });
     handleClose();
   }
@@ -121,6 +129,10 @@ export default function AddCardModal({ isOpen, onClose, onSubmit }) {
     setBankSearch("");
     setSelectedOrgId(null);
     setCategoryRows([{ categoryId: "", categoryPercent: "" }]);
+    setResetCategoriesEnabled(false);
+    setResetCategoriesDay(1);
+    setResetCategoriesMode("first");
+    setSpecificDayInput("15");
     onClose();
   }
 
@@ -215,7 +227,7 @@ export default function AddCardModal({ isOpen, onClose, onSubmit }) {
                   Добавить
                 </button>
               </div>
-              <div className="space-y-2 h-72 overflow-y-auto overflow-x-hidden scrollbar-visible w-full border border-bg-secondary rounded-lg p-2">
+              <div className="space-y-2 h-52 overflow-y-auto overflow-x-hidden scrollbar-visible w-full border border-bg-secondary rounded-lg p-1">
                 {categoryRows.map((row, index) => {
                   const availableCats = categories.filter(
                     (c) => c.id !== "all",
@@ -238,7 +250,7 @@ export default function AddCardModal({ isOpen, onClose, onSubmit }) {
                         className="flex-1 min-w-0 relative"
                       >
                         <ListboxButton className="flex w-full items-center justify-between gap-2 h-9 px-3 rounded-lg border border-border bg-bg-primary text-left text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent min-w-0">
-                          <span className="truncate">
+                          <span className="truncate pl-2">
                             {selectedCat?.name ?? "Выберите категорию"}
                           </span>
                           <ChevronUpDownIcon className="size-4 shrink-0 text-text-secondary" />
@@ -298,6 +310,123 @@ export default function AddCardModal({ isOpen, onClose, onSubmit }) {
                     </div>
                   );
                 })}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-text-secondary mb-2">
+                Автоматизация категорий
+              </label>
+              <div className="space-y-2 border border-bg-secondary rounded-lg p-2">
+                <label
+                  onClick={() => setResetCategoriesEnabled((prev) => !prev)}
+                  className="flex items-center gap-3 h-9 px-3 rounded-lg border border-border bg-bg-secondary cursor-pointer hover:bg-bg-primary transition-colors focus-within:ring-2 focus-within:ring-accent focus-within:outline-none"
+                >
+                  <Checkbox
+                    checked={resetCategoriesEnabled}
+                    onChange={setResetCategoriesEnabled}
+                    onClick={(e) => e.stopPropagation()}
+                    className="group flex size-4 shrink-0 items-center justify-center rounded border-2 border-border bg-bg-secondary transition-colors data-checked:border-accent data-checked:bg-accent focus:outline-none focus:ring-0"
+                  >
+                    <CheckIcon className="size-2.5 text-white opacity-0 group-data-checked:opacity-100" />
+                  </Checkbox>
+                  <span className="text-sm text-text-primary">
+                    Обнулять категории?
+                  </span>
+                </label>
+                {resetCategoriesEnabled && (
+                  <div className="space-y-2">
+                    <label className="block text-xs text-text-secondary mb-1">
+                      День месяца для обнуления
+                    </label>
+                    <Listbox
+                      as="div"
+                      value={resetCategoriesMode}
+                      onChange={(mode) => {
+                        setResetCategoriesMode(mode);
+                        if (mode === "first") setResetCategoriesDay(1);
+                        else if (mode === "last") setResetCategoriesDay(31);
+                        else {
+                          const day =
+                            resetCategoriesDay >= 2 &&
+                            resetCategoriesDay <= 30
+                              ? resetCategoriesDay
+                              : 15;
+                          setResetCategoriesDay(day);
+                          setSpecificDayInput(String(day));
+                        }
+                      }}
+                      className="relative"
+                    >
+                      <ListboxButton className="flex w-full items-center justify-between gap-2 h-9 px-3 rounded-lg border border-border bg-bg-primary text-left text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent min-w-0">
+                        <span className="pl-3">
+                          {resetCategoriesMode === "first"
+                            ? "Первый день месяца"
+                            : resetCategoriesMode === "last"
+                              ? "Последний день месяца"
+                              : "Конкретное число"}
+                        </span>
+                        <ChevronUpDownIcon className="size-4 shrink-0 text-text-secondary" />
+                      </ListboxButton>
+                      <ListboxOptions
+                        anchor={{ to: "bottom start", gap: 4, padding: 8 }}
+                        className="z-60 min-w-(--button-width) overflow-y-auto rounded-lg border border-border bg-bg-primary py-1 shadow-lg"
+                      >
+                        <ListboxOption
+                          value="first"
+                          className="cursor-pointer px-3 py-2 text-sm text-text-primary data-focus:bg-bg-secondary"
+                        >
+                          Первый день месяца
+                        </ListboxOption>
+                        <ListboxOption
+                          value="last"
+                          className="cursor-pointer px-3 py-2 text-sm text-text-primary data-focus:bg-bg-secondary"
+                        >
+                          Последний день месяца
+                        </ListboxOption>
+                        <ListboxOption
+                          value="specific"
+                          className="cursor-pointer px-3 py-2 text-sm text-text-primary data-focus:bg-bg-secondary"
+                        >
+                          Конкретное число
+                        </ListboxOption>
+                      </ListboxOptions>
+                    </Listbox>
+                    {resetCategoriesMode === "specific" && (
+                      <div>
+                        <label className="block text-xs text-text-secondary mb-1">
+                          Число (1–31)
+                        </label>
+                        <ResetDayInput
+                          inputValue={specificDayInput}
+                          onInputChange={setSpecificDayInput}
+                          dayValue={resetCategoriesDay}
+                          onDayChange={setResetCategoriesDay}
+                          onSwitchToLast={() => {
+                            setResetCategoriesMode("last");
+                            setResetCategoriesDay(31);
+                          }}
+                          className="w-full h-9 px-3 rounded-lg border border-border bg-bg-primary text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                        />
+                        <p className="mt-1 text-xs text-text-secondary">
+                          {resetCategoriesDay === 31
+                            ? "Обнуление 28–31 числа в зависимости от месяца"
+                            : `${resetCategoriesDay}-е число каждого месяца`}
+                        </p>
+                      </div>
+                    )}
+                    {resetCategoriesMode === "first" && (
+                      <p className="text-xs text-text-secondary">
+                        1-е число каждого месяца
+                      </p>
+                    )}
+                    {resetCategoriesMode === "last" && (
+                      <p className="text-xs text-text-secondary">
+                        Обнуление 28–31 числа в зависимости от месяца
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
