@@ -4,14 +4,14 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import Header from "./Header";
 import Footer from "./Footer";
 import Card from "./Card";
+import CardSkeleton from "./CardSkeleton";
 import AddCategoryModal from "./AddCategoryModal";
 import AddCardModal from "./AddCardModal";
 import ChangeBankModal from "./ChangeBankModal";
 import ConfirmActionModal from "./ConfirmActionModal";
 import data from "../data.json";
 import organizations from "../organizations";
-
-const STORAGE_KEY = "cardsData";
+import { loadStorage, saveStorage } from "../services/storageService";
 
 function parsePercentToNumber(value) {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -54,60 +54,91 @@ function normalizeUserOrganization(userOrg) {
   };
 }
 
-function loadUserOrganizations() {
-  const base = data.userOrganizations.map((userOrg) => {
+function getBaseUserOrganizations() {
+  return data.userOrganizations.map((userOrg) => {
     const org = organizations.find((org) => org.id === userOrg.organizationId);
     return {
       ...normalizeUserOrganization(userOrg),
       logo: org?.logo,
     };
   });
+}
 
-  if (typeof window === "undefined") {
-    return base;
-  }
-
-  try {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (!saved) return base;
-
-    const parsed = JSON.parse(saved);
-    if (
-      !parsed?.userOrganizations ||
-      !Array.isArray(parsed.userOrganizations)
-    ) {
-      return base;
-    }
-
-    return parsed.userOrganizations.map((userOrg) => {
-      const org = organizations.find((o) => o.id === userOrg.organizationId);
-      return {
-        ...normalizeUserOrganization(userOrg),
-        logo: org?.logo,
-      };
-    });
-  } catch {
-    return base;
-  }
+function enrichWithLogos(userOrganizations) {
+  return userOrganizations.map((userOrg) => {
+    const org = organizations.find((o) => o.id === userOrg.organizationId);
+    return {
+      ...normalizeUserOrganization(userOrg),
+      logo: org?.logo,
+    };
+  });
 }
 
 function saveUserOrganizations(items) {
-  if (typeof window === "undefined") return;
   const toSave = items.map((item) => {
     const { logo, ...rest } = item;
     void logo;
     return rest;
   });
-  window.localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify({ userOrganizations: toSave }),
-  );
+  saveStorage({ userOrganizations: toSave });
 }
 
 export default function MainPage() {
-  const [userOrganizations, setUserOrganizations] = useState(
-    loadUserOrganizations,
-  );
+  const [userOrganizations, setUserOrganizations] = useState([]);
+  const [isDataLoading, setIsDataLoading] = useState(true);
+
+  function applyMonthlyReset(items) {
+    const today = new Date();
+    const todayDay = today.getDate();
+    const lastDayOfMonth = new Date(
+      today.getFullYear(),
+      today.getMonth() + 1,
+      0,
+    ).getDate();
+    const monthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+
+    let changed = false;
+    const next = items.map((item) => {
+      if (
+        !item.resetCategoriesEnabled ||
+        item.resetCategoriesDay == null ||
+        item.lastCategoriesResetAt === monthKey
+      ) {
+        return item;
+      }
+      const isResetDay =
+        item.resetCategoriesDay === 31
+          ? todayDay === lastDayOfMonth
+          : todayDay === item.resetCategoriesDay;
+      if (!isResetDay) return item;
+      changed = true;
+      return {
+        ...item,
+        categories: [],
+        lastCategoriesResetAt: monthKey,
+      };
+    });
+    if (changed) saveUserOrganizations(next);
+    return next;
+  }
+
+  useEffect(() => {
+    loadStorage().then((parsed) => {
+      let items;
+      if (
+        parsed?.userOrganizations &&
+        Array.isArray(parsed.userOrganizations) &&
+        parsed.userOrganizations.length > 0
+      ) {
+        items = enrichWithLogos(parsed.userOrganizations);
+      } else {
+        items = getBaseUserOrganizations();
+      }
+      const afterReset = applyMonthlyReset(items);
+      setUserOrganizations(afterReset);
+      setIsDataLoading(false);
+    });
+  }, []);
 
   const [isMoveMode, setIsMoveMode] = useState(false);
   const [editingCardId, setEditingCardId] = useState(null);
@@ -396,43 +427,8 @@ export default function MainPage() {
 
   useEffect(() => {
     function checkAndResetCategories() {
-      const today = new Date();
-      const todayDay = today.getDate();
-      const lastDayOfMonth = new Date(
-        today.getFullYear(),
-        today.getMonth() + 1,
-        0,
-      ).getDate();
-      const monthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
-
-      setUserOrganizations((prev) => {
-        let changed = false;
-        const next = prev.map((item) => {
-          if (
-            !item.resetCategoriesEnabled ||
-            item.resetCategoriesDay == null ||
-            item.lastCategoriesResetAt === monthKey
-          ) {
-            return item;
-          }
-          const isResetDay =
-            item.resetCategoriesDay === 31
-              ? todayDay === lastDayOfMonth
-              : todayDay === item.resetCategoriesDay;
-          if (!isResetDay) return item;
-          changed = true;
-          return {
-            ...item,
-            categories: [],
-            lastCategoriesResetAt: monthKey,
-          };
-        });
-        if (changed) saveUserOrganizations(next);
-        return next;
-      });
+      setUserOrganizations((prev) => applyMonthlyReset(prev));
     }
-
-    checkAndResetCategories();
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
@@ -483,18 +479,25 @@ export default function MainPage() {
     <div className="flex flex-col justify-between items-center h-full">
       <Header onAddCardClick={() => setAddCardModalOpen(true)} />
 
-      <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-        {/* Внешний контейнер: окно с горизонтальным скроллом */}
+      {isDataLoading ? (
         <div className="w-full overflow-x-auto no-scrollbar">
-          <Droppable droppableId="cards" direction="horizontal">
-            {(provided) => (
-              // Внутренний контейнер: горизонтальная лента карточек
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className="flex flex-nowrap items-start gap-4 px-4 py-4"
-              >
-                {userOrganizations.map((organization, index) => {
+          <div className="flex flex-nowrap items-start gap-4 px-4 py-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+        </div>
+      ) : (
+        <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+          <div className="w-full overflow-x-auto no-scrollbar">
+            <Droppable droppableId="cards" direction="horizontal">
+              {(provided) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="flex flex-nowrap items-start gap-4 px-4 py-4"
+                >
+                  {userOrganizations.map((organization, index) => {
                   const isDeleting = deletingCardId === organization.id;
                   const isNew = lastAddedCardId === organization.id;
                   return (
@@ -556,6 +559,7 @@ export default function MainPage() {
           </Droppable>
         </div>
       </DragDropContext>
+      )}
 
       <div className="flex flex-row justify-center items-start">
         <Footer />
